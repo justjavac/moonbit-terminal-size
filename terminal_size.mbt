@@ -15,103 +15,51 @@ let probe_payload_len : Int = 4
 extern "C" fn terminal_size_probe_ffi(stream_kind : Int) -> Bytes = "mb_terminal_size_probe"
 
 ///|
-/// Width of a terminal measured in character cells.
+/// Visible size of a terminal measured in character cells.
 ///
-/// The wrapper keeps terminal column counts distinct from other integers and
-/// mirrors the intent of Rust's `terminal-size` crate, which models width and
-/// height as separate strong types.
+/// `columns` is the terminal width and `rows` is the terminal height.
+/// The public API uses a small record so callers can access
+/// `size.columns` and `size.rows` directly, which is usually more natural in
+/// MoonBit than wrapping each dimension in its own numeric newtype.
 ///
-/// Use [Width::to_int](/D:/Code/moonbit-terminal-size/terminal_size.mbt) when
-/// you need the width as a regular `Int`.
-pub struct Width {
-  columns : UInt16
+/// Values returned by [terminal_size](/D:/Code/moonbit-terminal-size/terminal_size.mbt)
+/// are always positive.
+pub struct Size {
+  columns : Int
+  rows : Int
 } derive(Eq, Show)
-
-///|
-/// Converts this terminal width into MoonBit's default `Int` type.
-///
-/// This is useful when you want to do arithmetic, comparisons, or string
-/// interpolation without carrying the wrapper type around.
-///
-/// # Example
-/// ```mbt check
-/// test {
-///   match @terminal_size.terminal_size() {
-///     Some((width, _)) => assert_true(width.to_int() > 0)
-///     None => ()
-///   }
-/// }
-/// ```
-pub fn Width::to_int(self : Width) -> Int {
-  self.columns.to_int()
-}
-
-///|
-/// Height of a terminal measured in character cells.
-///
-/// The wrapper keeps terminal row counts explicit in the type system and pairs
-/// with [Width](/D:/Code/moonbit-terminal-size/terminal_size.mbt) in the return
-/// value of [terminal_size](/D:/Code/moonbit-terminal-size/terminal_size.mbt).
-///
-/// Use [Height::to_int](/D:/Code/moonbit-terminal-size/terminal_size.mbt) when
-/// you need the height as a regular `Int`.
-pub struct Height {
-  rows : UInt16
-} derive(Eq, Show)
-
-///|
-/// Converts this terminal height into MoonBit's default `Int` type.
-///
-/// This is useful when you want to do arithmetic, comparisons, or string
-/// interpolation without carrying the wrapper type around.
-///
-/// # Example
-/// ```mbt check
-/// test {
-///   match @terminal_size.terminal_size() {
-///     Some((_, height)) => assert_true(height.to_int() > 0)
-///     None => ()
-///   }
-/// }
-/// ```
-pub fn Height::to_int(self : Height) -> Int {
-  self.rows.to_int()
-}
 
 ///|
 /// Decodes a big-endian unsigned 16-bit integer from two bytes.
-fn decode_u16(msb : Byte, lsb : Byte) -> UInt16 {
-  Int::to_uint16(msb.to_int() * 256 + lsb.to_int())
+fn decode_u16(msb : Byte, lsb : Byte) -> Int {
+  msb.to_int() * 256 + lsb.to_int()
 }
 
 ///|
 /// Turns a native probe payload into a terminal size tuple when it is valid.
-fn decode_probe_bytes(bytes : Bytes) -> (Width, Height)? {
+fn decode_probe_bytes(bytes : Bytes) -> Size? {
   if bytes.length() != probe_payload_len {
     None
   } else {
     let width = decode_u16(bytes[0], bytes[1])
     let height = decode_u16(bytes[2], bytes[3])
-    if width == Int::to_uint16(0) || height == Int::to_uint16(0) {
+    if width == 0 || height == 0 {
       None
     } else {
-      Some((Width::{ columns: width }, Height::{ rows: height }))
+      Some({ columns: width, rows: height })
     }
   }
 }
 
 ///|
 /// Probes one standard stream and decodes the native payload.
-fn terminal_size_of_stream(
-  stream_kind : Int,
-  probe : (Int) -> Bytes,
-) -> (Width, Height)? {
+fn terminal_size_of_stream(stream_kind : Int, probe : (Int) -> Bytes) -> Size? {
   decode_probe_bytes(probe(stream_kind))
 }
 
 ///|
 /// Probes standard streams in priority order until one returns a size.
-fn terminal_size_with(probe : (Int) -> Bytes) -> (Width, Height)? {
+fn terminal_size_with(probe : (Int) -> Bytes) -> Size? {
   for stream_kind in [stdout_stream_kind, stderr_stream_kind, stdin_stream_kind] {
     match terminal_size_of_stream(stream_kind, probe) {
       Some(size) => return Some(size)
@@ -134,21 +82,21 @@ fn terminal_size_with(probe : (Int) -> Bytes) -> (Width, Height)? {
 /// - Windows: `GetConsoleScreenBufferInfo`
 /// - Unix-like systems: `ioctl(TIOCGWINSZ)`
 ///
-/// The returned values describe the visible terminal window, not a scrollback
+/// The returned `Size` describes the visible terminal window, not a scrollback
 /// buffer or an off-screen backing store.
 ///
 /// # Example
 /// ```mbt check
 /// test {
 ///   match @terminal_size.terminal_size() {
-///     Some((width, height)) => {
-///       assert_true(width.to_int() > 0)
-///       assert_true(height.to_int() > 0)
+///     Some(size) => {
+///       assert_true(size.columns > 0)
+///       assert_true(size.rows > 0)
 ///     }
 ///     None => ()
 ///   }
 /// }
 /// ```
-pub fn terminal_size() -> (Width, Height)? {
+pub fn terminal_size() -> Size? {
   terminal_size_with(terminal_size_probe_ffi)
 }

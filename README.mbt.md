@@ -6,9 +6,9 @@ Cross-platform terminal size helpers for MoonBit.
 ///|
 test "terminal size api can be called" {
   match @terminal_size.terminal_size() {
-    Some((width, height)) => {
-      assert_true(width.to_int() > 0)
-      assert_true(height.to_int() > 0)
+    Some(size) => {
+      assert_true(size.columns > 0)
+      assert_true(size.rows > 0)
     }
     None => ()
   }

@@ -2,9 +2,9 @@
 /// Prints the current terminal size when one of the standard streams is a TTY.
 fn main {
   match @terminal_size.terminal_size() {
-    Some((width, height)) => {
-      println("Terminal width : \{width.to_int()} columns")
-      println("Terminal height: \{height.to_int()} rows")
+    Some(size) => {
+      println("Terminal width : \{size.columns} columns")
+      println("Terminal height: \{size.rows} rows")
     }
     None =>
       println(

@@ -11,15 +11,14 @@
 visible size of the current terminal.
 
 It is inspired by Rust's
-[`terminal-size`](https://github.com/eminence/terminal-size) crate and aims to
-offer the same simple experience in MoonBit: ask for the current terminal
-width and height, and receive `None` when the active standard streams are not
-connected to a terminal.
+[`terminal-size`](https://github.com/eminence/terminal-size) crate, but the
+public API is shaped to feel natural in MoonBit: ask for a `Size` record, then
+read `size.columns` and `size.rows` directly.
 
 ## Features
 
 - Cross-platform native support for Windows, macOS, Linux, and other Unix-like systems with `ioctl`
-- Simple API that returns `Option[(Width, Height)]`
+- Simple API that returns `Option[Size]`
 - Stream probing order that matches the Rust crate: `stdout`, `stderr`, then `stdin`
 - No external runtime dependencies
 - Native-only package with CI and coverage reporting for Linux, macOS, and Windows
@@ -36,8 +35,8 @@ This package supports the `native` target only.
 
 ```moonbit
 match @terminal_size.terminal_size() {
-  Some((width, height)) => {
-    println("terminal: \{width.to_int()} x \{height.to_int()}")
+  Some(size) => {
+    println("terminal: \{size.columns} x \{size.rows}")
   }
   None => {
     println("not attached to a terminal")
@@ -80,13 +79,11 @@ Terminal height: 30 rows
 
 ## API
 
-- `terminal_size() -> (Width, Height)?`
-- `Width::to_int() -> Int`
-- `Height::to_int() -> Int`
+- `terminal_size() -> Size?`
+- `Size { columns : Int, rows : Int }`
 
-`Width` and `Height` are lightweight wrappers around native terminal
-dimensions. They make the return value self-describing while still being easy
-to convert back to `Int` values for application logic.
+`Size` is a small record with named fields. That keeps call sites readable and
+fits MoonBit's preference for straightforward data access in domain types.
 
 ## Behavior Details
 
@@ -100,13 +97,12 @@ to convert back to `Int` values for application logic.
 This project is intentionally modeled after
 [`eminence/terminal-size`](https://github.com/eminence/terminal-size):
 
-- It keeps the same high-level mental model of returning width and height together.
+- It keeps the same high-level mental model of returning terminal dimensions together.
 - It follows the same standard-stream probe order.
 - It uses native OS APIs instead of shelling out to external tools.
 
-The MoonBit version adds small convenience methods, `Width::to_int()` and
-`Height::to_int()`, so callers can move from strong wrapper types back to plain
-integers ergonomically.
+The MoonBit version uses a named record instead of Rust-style wrapper types,
+which makes downstream code shorter and more idiomatic for MoonBit callers.
 
 ## Development
 

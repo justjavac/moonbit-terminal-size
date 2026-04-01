@@ -11,15 +11,9 @@ fn probe_payload(width : Int, height : Int) -> Bytes {
 
 ///|
 test "decode_u16 reconstructs the original value" {
-  assert_eq(decode_u16(Int::to_byte(0), Int::to_byte(0)), Int::to_uint16(0))
-  assert_eq(decode_u16(Int::to_byte(0), Int::to_byte(80)), Int::to_uint16(80))
-  assert_eq(decode_u16(Int::to_byte(1), Int::to_byte(44)), Int::to_uint16(300))
-}
-
-///|
-test "width and height wrappers convert back to int" {
-  assert_eq(Width::{ columns: Int::to_uint16(88) }.to_int(), 88)
-  assert_eq(Height::{ rows: Int::to_uint16(42) }.to_int(), 42)
+  assert_eq(decode_u16(Int::to_byte(0), Int::to_byte(0)), 0)
+  assert_eq(decode_u16(Int::to_byte(0), Int::to_byte(80)), 80)
+  assert_eq(decode_u16(Int::to_byte(1), Int::to_byte(44)), 300)
 }
 
 ///|
@@ -34,21 +28,11 @@ test "decode_probe_bytes rejects malformed payloads" {
 test "decode_probe_bytes decodes valid sizes" {
   assert_eq(
     decode_probe_bytes(probe_payload(80, 24)),
-    Some(
-      (
-        Width::{ columns: Int::to_uint16(80) },
-        Height::{ rows: Int::to_uint16(24) },
-      ),
-    ),
+    Some({ columns: 80, rows: 24 }),
   )
   assert_eq(
     decode_probe_bytes(probe_payload(240, 60)),
-    Some(
-      (
-        Width::{ columns: Int::to_uint16(240) },
-        Height::{ rows: Int::to_uint16(60) },
-      ),
-    ),
+    Some({ columns: 240, rows: 60 }),
   )
 }
 
@@ -60,12 +44,7 @@ test "terminal_size_of_stream decodes one probe result" {
       calls.push(kind)
       probe_payload(100, 40)
     }),
-    Some(
-      (
-        Width::{ columns: Int::to_uint16(100) },
-        Height::{ rows: Int::to_uint16(40) },
-      ),
-    ),
+    Some({ columns: 100, rows: 40 }),
   )
   assert_eq(calls, [stdout_stream_kind])
 }
@@ -81,15 +60,7 @@ test "terminal_size_with prefers stdout over later streams" {
     }
   })
 
-  assert_eq(
-    result,
-    Some(
-      (
-        Width::{ columns: Int::to_uint16(90) },
-        Height::{ rows: Int::to_uint16(30) },
-      ),
-    ),
-  )
+  assert_eq(result, Some({ columns: 90, rows: 30 }))
   assert_eq(calls, [stdout_stream_kind])
 }
 
@@ -105,15 +76,7 @@ test "terminal_size_with falls back from stdout to stderr" {
     }
   })
 
-  assert_eq(
-    result,
-    Some(
-      (
-        Width::{ columns: Int::to_uint16(120) },
-        Height::{ rows: Int::to_uint16(33) },
-      ),
-    ),
-  )
+  assert_eq(result, Some({ columns: 120, rows: 33 }))
   assert_eq(calls, [stdout_stream_kind, stderr_stream_kind])
 }
 
@@ -128,15 +91,7 @@ test "terminal_size_with falls back to stdin when needed" {
     }
   })
 
-  assert_eq(
-    result,
-    Some(
-      (
-        Width::{ columns: Int::to_uint16(132) },
-        Height::{ rows: Int::to_uint16(43) },
-      ),
-    ),
-  )
+  assert_eq(result, Some({ columns: 132, rows: 43 }))
   assert_eq(calls, [stdout_stream_kind, stderr_stream_kind, stdin_stream_kind])
 }
 

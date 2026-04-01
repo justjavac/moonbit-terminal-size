@@ -1,0 +1,10 @@
+import {
+  "justjavac/terminal_size",
+}
+
+supported_targets = "+native"
+
+options(
+  "is-main": true,
+  targets: { "main.mbt": [ "native" ] },
+)

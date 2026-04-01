@@ -1,0 +1,39 @@
+codecov:
+  require_ci_to_pass: true
+  notify:
+    after_n_builds: 3
+    wait_for_ci: true
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+      linux:
+        flags:
+          - linux
+        target: auto
+      macos:
+        flags:
+          - macos
+        target: auto
+      windows:
+        flags:
+          - windows
+        target: auto
+
+flags:
+  linux:
+    paths:
+      - terminal_size.mbt
+  macos:
+    paths:
+      - terminal_size.mbt
+  windows:
+    paths:
+      - terminal_size.mbt
+
+comment:
+  layout: "diff, flags, files"
+  behavior: default
+  require_changes: false

@@ -1,7 +1,16 @@
 # justjavac/terminal_size
 
-Package documentation and doctested examples now live in
-[src/README.mbt.md](/D:/Code/moonbit-terminal-size/src/README.mbt.md).
+Cross-platform terminal size helpers for MoonBit.
 
-This root file is kept as a lightweight repository entry point after the
-package sources moved into `src/`.
+```mbt check
+///|
+test "terminal size api can be called" {
+  match @terminal_size.terminal_size() {
+    Some(size) => {
+      assert_true(size.columns > 0)
+      assert_true(size.rows > 0)
+    }
+    None => ()
+  }
+}
+```

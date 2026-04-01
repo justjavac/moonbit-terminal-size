@@ -49,7 +49,7 @@ match @terminal_size.terminal_size() {
 Run the bundled example from the repository root:
 
 ```bash
-moon run examples/show_size --target native
+moon -C examples/show_size run . --target native
 ```
 
 Typical output:

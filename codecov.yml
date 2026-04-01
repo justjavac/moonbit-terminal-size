@@ -25,13 +25,13 @@ coverage:
 flags:
   linux:
     paths:
-      - terminal_size.mbt
+      - src/terminal_size.mbt
   macos:
     paths:
-      - terminal_size.mbt
+      - src/terminal_size.mbt
   windows:
     paths:
-      - terminal_size.mbt
+      - src/terminal_size.mbt
 
 comment:
   layout: "diff, flags, files"

@@ -1,0 +1,18 @@
+{
+  "name": "justjavac/terminal_size/examples/show_size",
+  "version": "0.1.0",
+  "deps": {
+    "justjavac/terminal_size": {
+      "path": "../.."
+    }
+  },
+  "readme": "",
+  "repository": "https://github.com/justjavac/moonbit-terminal-size/tree/main/examples/show_size",
+  "license": "MIT",
+  "keywords": [],
+  "description": "",
+  "source": "",
+  "warn-list": "",
+  "preferred-target": "native",
+  "supported-targets": "+native"
+}

@@ -22,8 +22,7 @@ extern "C" fn terminal_size_probe_ffi(stream_kind : Int) -> Bytes = "mb_terminal
 /// `size.columns` and `size.rows` directly, which is usually more natural in
 /// MoonBit than wrapping each dimension in its own numeric newtype.
 ///
-/// Values returned by [terminal_size](/D:/Code/moonbit-terminal-size/terminal_size.mbt)
-/// are always positive.
+/// Values returned by `terminal_size()` are always positive.
 pub struct Size {
   columns : Int
   rows : Int

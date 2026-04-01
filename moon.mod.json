@@ -14,7 +14,7 @@
     "linux"
   ],
   "description": "Cross-platform terminal size helpers for MoonBit.",
-  "source": "",
+  "source": "src",
   "warn-list": "",
   "preferred-target": "native",
   "supported-targets": "+native"

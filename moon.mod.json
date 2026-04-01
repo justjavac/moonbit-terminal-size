@@ -1,0 +1,21 @@
+{
+  "name": "justjavac/terminal_size",
+  "version": "0.1.0",
+  "readme": "README.md",
+  "repository": "https://github.com/justjavac/moonbit-terminal-size",
+  "license": "MIT",
+  "keywords": [
+    "terminal",
+    "tty",
+    "console",
+    "native",
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "description": "Cross-platform terminal size helpers for MoonBit.",
+  "source": "",
+  "warn-list": "",
+  "preferred-target": "native",
+  "supported-targets": "+native"
+}

@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "justjavac/terminal_size"
+
+// Values
+pub fn terminal_size() -> (Width, Height)?
+
+// Errors
+
+// Types and methods
+pub struct Height {
+  rows : UInt16
+} derive(Eq, Show)
+pub fn Height::to_int(Self) -> Int
+
+pub struct Width {
+  columns : UInt16
+} derive(Eq, Show)
+pub fn Width::to_int(Self) -> Int
+
+// Type aliases
+
+// Traits
+

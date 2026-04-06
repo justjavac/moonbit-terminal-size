@@ -2,6 +2,13 @@
 
 #include "moonbit.h"
 
+enum {
+  MB_STDOUT_STREAM_KIND = 0,
+  MB_STDERR_STREAM_KIND = 1,
+  MB_STDIN_STREAM_KIND = 2,
+  MB_TERMINAL_SIZE_PAYLOAD_LEN = 4,
+};
+
 static moonbit_bytes_t mb_empty_terminal_size(void) {
   return moonbit_make_bytes(0, 0);
 }
@@ -11,7 +18,8 @@ static moonbit_bytes_t mb_make_terminal_size(int width, int height) {
     return mb_empty_terminal_size();
   }
 
-  uint8_t *result = (uint8_t *)moonbit_make_bytes(4, 0);
+  uint8_t *result =
+      (uint8_t *)moonbit_make_bytes(MB_TERMINAL_SIZE_PAYLOAD_LEN, 0);
   result[0] = (uint8_t)((width >> 8) & 0xff);
   result[1] = (uint8_t)(width & 0xff);
   result[2] = (uint8_t)((height >> 8) & 0xff);
@@ -23,21 +31,21 @@ static moonbit_bytes_t mb_make_terminal_size(int width, int height) {
 
 #include <windows.h>
 
-static DWORD mb_stream_kind_to_handle_id(int32_t stream_kind) {
+static HANDLE mb_handle_for_stream_kind(int32_t stream_kind) {
   switch (stream_kind) {
-  case 0:
-    return STD_OUTPUT_HANDLE;
-  case 1:
-    return STD_ERROR_HANDLE;
-  case 2:
-    return STD_INPUT_HANDLE;
+  case MB_STDOUT_STREAM_KIND:
+    return GetStdHandle(STD_OUTPUT_HANDLE);
+  case MB_STDERR_STREAM_KIND:
+    return GetStdHandle(STD_ERROR_HANDLE);
+  case MB_STDIN_STREAM_KIND:
+    return GetStdHandle(STD_INPUT_HANDLE);
   default:
-    return STD_OUTPUT_HANDLE;
+    return INVALID_HANDLE_VALUE;
   }
 }
 
 MOONBIT_FFI_EXPORT moonbit_bytes_t mb_terminal_size_probe(int32_t stream_kind) {
-  HANDLE handle = GetStdHandle(mb_stream_kind_to_handle_id(stream_kind));
+  HANDLE handle = mb_handle_for_stream_kind(stream_kind);
   if (handle == NULL || handle == INVALID_HANDLE_VALUE) {
     return mb_empty_terminal_size();
   }
@@ -59,11 +67,11 @@ MOONBIT_FFI_EXPORT moonbit_bytes_t mb_terminal_size_probe(int32_t stream_kind) {
 
 static int mb_stream_kind_to_fd(int32_t stream_kind) {
   switch (stream_kind) {
-  case 0:
+  case MB_STDOUT_STREAM_KIND:
     return STDOUT_FILENO;
-  case 1:
+  case MB_STDERR_STREAM_KIND:
     return STDERR_FILENO;
-  case 2:
+  case MB_STDIN_STREAM_KIND:
     return STDIN_FILENO;
   default:
     return -1;
@@ -76,11 +84,7 @@ MOONBIT_FFI_EXPORT moonbit_bytes_t mb_terminal_size_probe(int32_t stream_kind) {
     return mb_empty_terminal_size();
   }
 
-  struct winsize size;
-  size.ws_col = 0;
-  size.ws_row = 0;
-  size.ws_xpixel = 0;
-  size.ws_ypixel = 0;
+  struct winsize size = {0};
 
   if (ioctl(fd, TIOCGWINSZ, &size) != 0) {
     return mb_empty_terminal_size();

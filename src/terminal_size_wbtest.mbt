@@ -10,6 +10,28 @@ fn probe_payload(width : Int, height : Int) -> Bytes {
 }
 
 ///|
+/// Runs `terminal_size_with` while recording which streams were probed.
+fn traced_terminal_size_with(
+  calls : Array[Int],
+  probe : (Int) -> Bytes,
+) -> Size? {
+  terminal_size_with(kind => {
+    calls.push(kind)
+    probe(kind)
+  })
+}
+
+///|
+/// Builds a probe that succeeds for one stream kind and fails for the others.
+fn probe_that_succeeds_on(
+  stream_kind : Int,
+  width : Int,
+  height : Int,
+) -> (Int) -> Bytes {
+  kind => if kind == stream_kind { probe_payload(width, height) } else { [] }
+}
+
+///|
 test "decode_u16 reconstructs the original value" {
   assert_eq(decode_u16(Int::to_byte(0), Int::to_byte(0)), 0)
   assert_eq(decode_u16(Int::to_byte(0), Int::to_byte(80)), 80)
@@ -52,13 +74,10 @@ test "terminal_size_of_stream decodes one probe result" {
 ///|
 test "terminal_size_with prefers stdout over later streams" {
   let calls : Array[Int] = []
-  let result = terminal_size_with(kind => {
-    calls.push(kind)
-    match kind {
-      0 => probe_payload(90, 30)
-      _ => []
-    }
-  })
+  let result = traced_terminal_size_with(
+    calls,
+    probe_that_succeeds_on(stdout_stream_kind, 90, 30),
+  )
 
   assert_eq(result, Some({ columns: 90, rows: 30 }))
   assert_eq(calls, [stdout_stream_kind])
@@ -67,14 +86,10 @@ test "terminal_size_with prefers stdout over later streams" {
 ///|
 test "terminal_size_with falls back from stdout to stderr" {
   let calls : Array[Int] = []
-  let result = terminal_size_with(kind => {
-    calls.push(kind)
-    match kind {
-      0 => []
-      1 => probe_payload(120, 33)
-      _ => []
-    }
-  })
+  let result = traced_terminal_size_with(
+    calls,
+    probe_that_succeeds_on(stderr_stream_kind, 120, 33),
+  )
 
   assert_eq(result, Some({ columns: 120, rows: 33 }))
   assert_eq(calls, [stdout_stream_kind, stderr_stream_kind])
@@ -83,26 +98,20 @@ test "terminal_size_with falls back from stdout to stderr" {
 ///|
 test "terminal_size_with falls back to stdin when needed" {
   let calls : Array[Int] = []
-  let result = terminal_size_with(kind => {
-    calls.push(kind)
-    match kind {
-      2 => probe_payload(132, 43)
-      _ => []
-    }
-  })
+  let result = traced_terminal_size_with(
+    calls,
+    probe_that_succeeds_on(stdin_stream_kind, 132, 43),
+  )
 
   assert_eq(result, Some({ columns: 132, rows: 43 }))
-  assert_eq(calls, [stdout_stream_kind, stderr_stream_kind, stdin_stream_kind])
+  assert_eq(calls, standard_stream_kinds)
 }
 
 ///|
 test "terminal_size_with returns none when all probes fail" {
   let calls : Array[Int] = []
-  let result = terminal_size_with(kind => {
-    calls.push(kind)
-    []
-  })
+  let result = traced_terminal_size_with(calls, _ => [])
 
   assert_eq(result, None)
-  assert_eq(calls, [stdout_stream_kind, stderr_stream_kind, stdin_stream_kind])
+  assert_eq(calls, standard_stream_kinds)
 }

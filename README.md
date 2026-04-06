@@ -18,7 +18,7 @@ read `size.columns` and `size.rows` directly.
 ## Features
 
 - Cross-platform native support for Windows, macOS, Linux, and other Unix-like systems with `ioctl`
-- Simple API that returns `Option[Size]`
+- Simple API that returns `Size?`
 - Stream probing order that matches the Rust crate: `stdout`, `stderr`, then `stdin`
 - No external runtime dependencies
 - Native-only package with CI and coverage reporting for Linux, macOS, and Windows

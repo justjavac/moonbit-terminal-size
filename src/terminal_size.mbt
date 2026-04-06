@@ -11,6 +11,12 @@ let stdin_stream_kind : Int = 2
 let probe_payload_len : Int = 4
 
 ///|
+/// Shared probe order for standard streams.
+let standard_stream_kinds : Array[Int] = [
+  stdout_stream_kind, stderr_stream_kind, stdin_stream_kind,
+]
+
+///|
 /// Probes one standard stream and returns a four-byte payload on success.
 extern "C" fn terminal_size_probe_ffi(stream_kind : Int) -> Bytes = "mb_terminal_size_probe"
 
@@ -35,18 +41,25 @@ fn decode_u16(msb : Byte, lsb : Byte) -> Int {
 }
 
 ///|
-/// Turns a native probe payload into a terminal size tuple when it is valid.
+/// Builds a size only when both dimensions are positive.
+fn size_from_dimensions(columns : Int, rows : Int) -> Size? {
+  if columns <= 0 || rows <= 0 {
+    None
+  } else {
+    Some({ columns, rows })
+  }
+}
+
+///|
+/// Turns a native probe payload into a terminal size record when it is valid.
 fn decode_probe_bytes(bytes : Bytes) -> Size? {
   if bytes.length() != probe_payload_len {
     None
   } else {
-    let width = decode_u16(bytes[0], bytes[1])
-    let height = decode_u16(bytes[2], bytes[3])
-    if width == 0 || height == 0 {
-      None
-    } else {
-      Some({ columns: width, rows: height })
-    }
+    size_from_dimensions(
+      decode_u16(bytes[0], bytes[1]),
+      decode_u16(bytes[2], bytes[3]),
+    )
   }
 }
 
@@ -59,7 +72,7 @@ fn terminal_size_of_stream(stream_kind : Int, probe : (Int) -> Bytes) -> Size? {
 ///|
 /// Probes standard streams in priority order until one returns a size.
 fn terminal_size_with(probe : (Int) -> Bytes) -> Size? {
-  for stream_kind in [stdout_stream_kind, stderr_stream_kind, stdin_stream_kind] {
+  for stream_kind in standard_stream_kinds {
     match terminal_size_of_stream(stream_kind, probe) {
       Some(size) => return Some(size)
       None => ()

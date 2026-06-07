@@ -32,7 +32,12 @@ extern "C" fn terminal_size_probe_ffi(stream_kind : Int) -> Bytes = "mb_terminal
 pub struct Size {
   columns : Int
   rows : Int
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for Size with fn to_string(self) -> String {
+  "{ columns: \{self.columns}, rows: \{self.rows} }"
+}
 
 ///|
 /// Decodes a big-endian unsigned 16-bit integer from two bytes.

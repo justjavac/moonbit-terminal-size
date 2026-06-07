@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "justjavac/terminal_size"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
 pub fn terminal_size() -> Size?
 
@@ -10,7 +14,8 @@ pub fn terminal_size() -> Size?
 pub struct Size {
   columns : Int
   rows : Int
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for Size
 
 // Type aliases
 

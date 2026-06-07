@@ -40,20 +40,19 @@ test "decode_u16 reconstructs the original value" {
 
 ///|
 test "decode_probe_bytes rejects malformed payloads" {
-  assert_eq(decode_probe_bytes([]), None)
-  assert_eq(decode_probe_bytes([0, 80, 0]), None)
-  assert_eq(decode_probe_bytes([0, 0, 0, 24]), None)
-  assert_eq(decode_probe_bytes([0, 80, 0, 0]), None)
+  assert_true(decode_probe_bytes([]) == None)
+  assert_true(decode_probe_bytes([0, 80, 0]) == None)
+  assert_true(decode_probe_bytes([0, 0, 0, 24]) == None)
+  assert_true(decode_probe_bytes([0, 80, 0, 0]) == None)
 }
 
 ///|
 test "decode_probe_bytes decodes valid sizes" {
-  assert_eq(
-    decode_probe_bytes(probe_payload(80, 24)),
-    Some({ columns: 80, rows: 24 }),
+  assert_true(
+    decode_probe_bytes(probe_payload(80, 24)) == Some({ columns: 80, rows: 24 }),
   )
-  assert_eq(
-    decode_probe_bytes(probe_payload(240, 60)),
+  assert_true(
+    decode_probe_bytes(probe_payload(240, 60)) ==
     Some({ columns: 240, rows: 60 }),
   )
 }
@@ -61,14 +60,14 @@ test "decode_probe_bytes decodes valid sizes" {
 ///|
 test "terminal_size_of_stream decodes one probe result" {
   let calls : Array[Int] = []
-  assert_eq(
+  assert_true(
     terminal_size_of_stream(stdout_stream_kind, kind => {
       calls.push(kind)
       probe_payload(100, 40)
-    }),
+    }) ==
     Some({ columns: 100, rows: 40 }),
   )
-  assert_eq(calls, [stdout_stream_kind])
+  assert_true(calls == [stdout_stream_kind])
 }
 
 ///|
@@ -79,8 +78,8 @@ test "terminal_size_with prefers stdout over later streams" {
     probe_that_succeeds_on(stdout_stream_kind, 90, 30),
   )
 
-  assert_eq(result, Some({ columns: 90, rows: 30 }))
-  assert_eq(calls, [stdout_stream_kind])
+  assert_true(result == Some({ columns: 90, rows: 30 }))
+  assert_true(calls == [stdout_stream_kind])
 }
 
 ///|
@@ -91,8 +90,8 @@ test "terminal_size_with falls back from stdout to stderr" {
     probe_that_succeeds_on(stderr_stream_kind, 120, 33),
   )
 
-  assert_eq(result, Some({ columns: 120, rows: 33 }))
-  assert_eq(calls, [stdout_stream_kind, stderr_stream_kind])
+  assert_true(result == Some({ columns: 120, rows: 33 }))
+  assert_true(calls == [stdout_stream_kind, stderr_stream_kind])
 }
 
 ///|
@@ -103,8 +102,8 @@ test "terminal_size_with falls back to stdin when needed" {
     probe_that_succeeds_on(stdin_stream_kind, 132, 43),
   )
 
-  assert_eq(result, Some({ columns: 132, rows: 43 }))
-  assert_eq(calls, standard_stream_kinds)
+  assert_true(result == Some({ columns: 132, rows: 43 }))
+  assert_true(calls == standard_stream_kinds)
 }
 
 ///|
@@ -112,6 +111,6 @@ test "terminal_size_with returns none when all probes fail" {
   let calls : Array[Int] = []
   let result = traced_terminal_size_with(calls, _ => [])
 
-  assert_eq(result, None)
-  assert_eq(calls, standard_stream_kinds)
+  assert_true(result == None)
+  assert_true(calls == standard_stream_kinds)
 }

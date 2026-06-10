@@ -1,6 +1,6 @@
 name = "justjavac/terminal_size"
 
-version = "0.1.4"
+version = "0.1.5"
 
 readme = "README.mbt.md"
 
@@ -24,7 +24,7 @@ warnings = ""
 
 preferred_target = "native"
 
-supported_targets = "+native"
+supported_targets = "native"
 
 options(
   source: "src",

@@ -118,7 +118,7 @@ The test suite includes:
 
 - Black-box tests for the public API
 - White-box tests for payload decoding and probe order
-- Coverage checks that currently reach 100% for the MoonBit layer
+- Coverage checks for the MoonBit layer
 
 ## License
 

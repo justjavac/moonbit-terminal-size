@@ -34,6 +34,12 @@ pub struct Size {
   rows : Int
 } derive(Eq, Debug)
 
+pub extend Size with Eq::{equal, not_equal}
+
+pub extend Size with @debug.Debug::{to_repr}
+
+pub extend Size with Show::{to_string, output}
+
 ///|
 pub impl Show for Size with fn to_string(self) -> String {
   "{ columns: \{self.columns}, rows: \{self.rows} }"

@@ -34,10 +34,13 @@ pub struct Size {
   rows : Int
 } derive(Eq, Debug)
 
+///|
 pub extend Size with Eq::{equal, not_equal}
 
+///|
 pub extend Size with @debug.Debug::{to_repr}
 
+///|
 pub extend Size with Show::{to_string, output}
 
 ///|
@@ -57,7 +60,7 @@ fn size_from_dimensions(columns : Int, rows : Int) -> Size? {
   if columns <= 0 || rows <= 0 {
     None
   } else {
-    Some({ columns, rows })
+    Some({ columns, rows, })
   }
 }
 

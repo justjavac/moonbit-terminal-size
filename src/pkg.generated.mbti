@@ -15,9 +15,13 @@ pub struct Size {
   columns : Int
   rows : Int
 } derive(Eq, @debug.Debug)
+pub fn Size::equal(Self, Self) -> Bool
+pub fn Size::not_equal(Self, Self) -> Bool
+pub fn Size::output(Self, &Logger) -> Unit
+pub fn Size::to_repr(Self) -> @debug.Repr
+pub fn Size::to_string(Self) -> String
 pub impl Show for Size
 
 // Type aliases
 
 // Traits
-
